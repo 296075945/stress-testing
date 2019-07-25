@@ -19,7 +19,9 @@ import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http2.Http2FrameAdapter;
 import io.netty.handler.codec.http2.Http2FrameCodecBuilder;
+import io.netty.handler.codec.http2.Http2Headers;
 import io.netty.handler.codec.http2.Http2MultiplexHandler;
+import io.netty.handler.codec.http2.HttpConversionUtil;
 import io.netty.handler.codec.http2.HttpToHttp2ConnectionHandlerBuilder;
 
 public class Http2Test {
@@ -46,7 +48,7 @@ public class Http2Test {
 
                 ChannelPipeline pipeline = ch.pipeline();
 
-                pipeline.addLast(builder.build());
+//                pipeline.addLast(builder.build());
                 pipeline.addLast(Http2FrameCodecBuilder.forClient().build());
 //                pipeline.addLast(builder.build());
 
@@ -74,14 +76,12 @@ public class Http2Test {
 //        request.headers().set(HttpHeaderNames.CONNECTION, "Upgrade,HTTP2-Settings");
 //
 //        request.headers().set("HTTP2-Settings", "AAMAAABkAARAAAAAAAIAAAAA");
-        channel.writeAndFlush(request);
+//        channel.writeAndFlush(request);
 
-//        Http2Headers headers = new DefaultHttp2Headers();
-//
-//        HttpConversionUtil.toHttp2Headers(request.headers(), headers);
-//
-//        System.out.println(headers);
-//
+        Http2Headers headers = HttpConversionUtil.toHttp2Headers(request, true);
+        System.out.println(headers);
+        channel.writeAndFlush(headers);
+        
 //        Http2HeadersFrame headersFrame = new DefaultHttp2HeadersFrame(headers);
 //
 //        channel.writeAndFlush(headersFrame);
