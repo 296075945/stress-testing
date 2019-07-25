@@ -70,6 +70,7 @@ public class Test {
 
             }
         });
+        
 
         Channel channel = bootstrap.connect("localhost", 8080).sync().channel();
         for (int i = 0; i < 10; i++) {

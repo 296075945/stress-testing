@@ -8,6 +8,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.wy.stress.testing.asserts.Assert;
+import com.wy.stress.testing.asserts.ResponseStatusAssert;
+import com.wy.stress.testing.report.DefaultReport;
+import com.wy.stress.testing.report.Report;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -47,14 +52,19 @@ public class HttpClient {
     private String host;
     private int port;
 
+    private Assert[] asserts;
+
+    private Report[] reports;
+
     public HttpClient(int capacity, String host, int port) {
         permit = new Semaphore(capacity);
 //        this.capacity = capacity;
         this.host = host;
         this.port = port;
         free = new LinkedList<>();
-
         channelMap = new ConcurrentHashMap<>((int) (capacity / 0.75));
+        asserts = new Assert[] { new ResponseStatusAssert() };
+        reports = new Report[] { new DefaultReport() };
     }
 
     private Channel getChannel() {
@@ -153,6 +163,12 @@ public class HttpClient {
 //                        FullHttpRequest request = channelMap.remove(channel);
                         ChannelRequestWrapper requestWrapper = channelMap.remove(channel);
                         HttpRequest request = requestWrapper.getRequest();
+                        long begin = requestWrapper.getBegin();
+                        long end = System.currentTimeMillis();
+
+                        boolean success = asserts(request, response);
+
+                        reports(request, response, end - begin, success);
                         ResponseFuture responseFuture = requestWrapper.getResponseFuture();
                         responseFuture.done(response);
                         freeChannel(channel);
@@ -161,10 +177,6 @@ public class HttpClient {
                         bf.readBytes(buff);
                         response.getStatus();
 
-//                        System.out.println(request);
-//                        System.out.println(new String(buff));
-//                        System.out.println("---------------");
-
                     }
 
                 });
@@ -172,6 +184,24 @@ public class HttpClient {
             }
         });
 
+    }
+
+    private boolean asserts(HttpRequest request, HttpResponse response) {
+        boolean success = true;
+        if (asserts != null && asserts.length > 0) {
+            for (Assert assert1 : asserts) {
+                assert1.check(request, response);
+            }
+        }
+        return success;
+    }
+
+    private void reports(HttpRequest request, HttpResponse response, long rtt, boolean success) {
+        if (reports != null && reports.length > 0) {
+            for (Report report : reports) {
+                report.report(request, response, rtt, success);
+            }
+        }
     }
 
     class ChannelRequestWrapper {

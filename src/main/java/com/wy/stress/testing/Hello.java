@@ -12,12 +12,12 @@ public class Hello {
             String url = "http://localhost:8080/test2?id=" + ThreadLocalRandom.current().nextInt(30);
 
             try {
-
                 client.post(url, null, null);
             } catch (Exception e) {
                 // TODO: handle exception
             }
         }
+        
 
     }
 }

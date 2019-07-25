@@ -15,6 +15,10 @@ public class ResponseStatusAssert implements Assert {
         this.status = Arrays.asList(status);
     }
 
+    public ResponseStatusAssert() {
+        this(HttpResponseStatus.OK);
+    }
+
     @Override
     public boolean check(HttpRequest request, HttpResponse response) {
         HttpResponseStatus responseStatus = response.getStatus();
