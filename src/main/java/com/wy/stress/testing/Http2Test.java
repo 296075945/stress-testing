@@ -4,8 +4,6 @@ import java.net.URI;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
@@ -19,9 +17,6 @@ import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http2.Http2FrameAdapter;
 import io.netty.handler.codec.http2.Http2FrameCodecBuilder;
-import io.netty.handler.codec.http2.Http2Headers;
-import io.netty.handler.codec.http2.Http2MultiplexHandler;
-import io.netty.handler.codec.http2.HttpConversionUtil;
 import io.netty.handler.codec.http2.HttpToHttp2ConnectionHandlerBuilder;
 
 public class Http2Test {
@@ -48,22 +43,18 @@ public class Http2Test {
 
                 ChannelPipeline pipeline = ch.pipeline();
 
-//                pipeline.addLast(builder.build());
+                pipeline.addLast(builder.build());
                 pipeline.addLast(Http2FrameCodecBuilder.forClient().build());
-//                pipeline.addLast(builder.build());
+//                pipeline.addLast(new Http2MultiplexHandler(new ChannelInboundHandlerAdapter() {
+//
+//                    @Override
+//                    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+//                        super.channelRead(ctx, msg);
+//                        System.out.println(msg);
+//                    }
+//
+//                }));
 
-                pipeline.addLast(new Http2MultiplexHandler(new ChannelInboundHandlerAdapter() {
-
-                    @Override
-                    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-                        // TODO Auto-generated method stub
-                        super.channelRead(ctx, msg);
-                        System.out.println(msg);
-                    }
-
-                }));
-
-//                pipeline.addLast()
 
             }
         });
@@ -76,13 +67,13 @@ public class Http2Test {
 //        request.headers().set(HttpHeaderNames.CONNECTION, "Upgrade,HTTP2-Settings");
 //
 //        request.headers().set("HTTP2-Settings", "AAMAAABkAARAAAAAAAIAAAAA");
-//        channel.writeAndFlush(request);
+        channel.writeAndFlush(request);
 
-        Http2Headers headers = HttpConversionUtil.toHttp2Headers(request, true);
-        System.out.println(headers);
-        channel.writeAndFlush(headers);
-        
+//        Http2Headers headers = HttpConversionUtil.toHttp2Headers(request, true);
+//        System.out.println(headers);
+//
 //        Http2HeadersFrame headersFrame = new DefaultHttp2HeadersFrame(headers);
+//        channel.writeAndFlush(headersFrame);
 //
 //        channel.writeAndFlush(headersFrame);
 //
